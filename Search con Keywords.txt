@@ -103,3 +103,4 @@ for i in range(len(lista)):
 print(len(id))
 
 #risultato 2564
+forse è diverso il risultato?
