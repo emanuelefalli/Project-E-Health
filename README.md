@@ -5,3 +5,5 @@ Per modificare un file basta aprirlo e iniziare a editare, quando l'editing è f
 su cui stavo lavorando. Devo per forza dare un nome (commit) ai miei cambiamenti per dire agli altri cosa ho fatto in quel momento. Una volta fatto ti si crea una nuova versione che RIMANE IN LOCALE. Questo è importante
 perchè nessuno vedrà i tuoi cambiamenti (in remoto) fin quando non li condividi. Per farlo devi schiacciare su push. In questo modo il remoto si sincronizza con il tuo pc e tutti hanno il file aggiornato.
 
+Per creare un nuovo file su cui iniziare a scrivere parte del codice, andate in basso a destra dove compare la lista dei files, e con tasto destro puoi dare un nome ad un nuovo file. 
+Chiamalo sempre con l'estensione .txt così si crea un file di testo.
