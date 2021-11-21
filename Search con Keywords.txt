@@ -1,0 +1,105 @@
+#SCHEMA:
+#1. Search_con_keywords: cerco le parole chiave nella descrizione di tutto il PlayStore
+#2. unione_liste_csv: lavoro su tre liste di parole in modo da poter lavorare su più pc ed essere più veloce
+#3. Scrape_con_categorie: filtro in base alle categorie, score, reviews e installs e ottengo un file excel
+#4. cancello_colonne: elimino colonne non necessarie dal file excel
+#5. score: do la valutazione alle app estratte in base al numero di parole e aggiorno database
+
+#importo cosa serve per lavorare
+from pprint import pp
+import ssl
+import play_scraper
+ssl._create_default_https_context = ssl._create_unverified_context
+
+query = list() #lista delle app contenenti le keywords scelte
+line = [] #dictionary con le app contenenti la query
+lista = list() #lista di tutte le applicazioni contenenti la query
+id = list() #lista degli ID delle app contenenti le keywords
+
+id_list = open("id_list_final.csv", 'w')
+
+#scegliamo delle parole chiave inidicative di quello che reputiamo possa esserci nella descrizione di un serious game,
+#la funzione search di play-scraper cerca nella descrizione delle app le parole da noi scelte; abbiamo dovuto dividere
+#le parole in tre gruppi in modo da poter lavorare in modo sincrono con tre computer e quindi rendere il procedimento
+#più veloce; avremo come output di questo primo step tre file csv che dovremo unire in un singolo file csv (dovrà essere
+#svolto un controllo su entuali ID doppioni
+
+#keywords PC 1
+keywords1 = ['ADHD',
+            'book', 'brain',
+            'conduct disorder', 'child', 'care',
+            'dys', 'DSA', 'disorder', 'disease', 'didactics',
+            'edu']
+
+#keywords PC2
+keywords2 = ['game', 'geometry',
+            'health', 'homework',
+            'instruct',
+            'juvenile',
+            'kid', 'know',
+            'learn', 'language', 'lectur', 'language teaching']
+
+#keyword PC 3
+keywords3 = ['learning activity',
+            'math',
+            'post-traumatic stress disorder', 'PTSD', 'pedagog', 'physics'
+            'rehab', 'read',
+            'sleep-learning', 'school', 'serious',
+            'teach', 'tutorship']
+
+#keywords totale
+keywords =['ADHD',
+           'book', 'brain','baby','babies',
+           'conduct disorder', 'child', 'care','counting','challenge',
+           'dys', 'DSA', 'disorder', 'disease', 'didactics','develop',
+           'edu',
+           'fun',
+           'game', 'geometry',
+           'health', 'homework',
+           'instruct','infant',
+           'juvenile',
+           'kid', 'know','kindergarten',
+           'learn', 'language', 'lectur', 'language teaching','learning activity',
+           'math','mind','mental','memory'
+           'post-traumatic stress disorder', 'PTSD', 'pedagog', 'physics','puzzle','preschool','phonic',
+           'quiz',
+           'rehab', 'read',
+           'sleep-learning', 'school','serious','skill',
+           'teach', 'tutorship','toddler','training']
+
+#creazione query con le keywords
+for i in range(len(keywords)):
+    query.append(keywords[i])
+
+#ricerca query nel Google PlayStore attraverso play-scraper
+pages = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+for i in range(len(query)):
+    for z in range(len(pages)):
+        line += play_scraper.search(query[i], page=z)
+
+#siccome più parole possono rimandare a una stessa app, facciamo un confronto di eventuali ID doppioni nella lista line
+#e facciamo in modo che ci sia solo una copia delle app nella lista lista
+k = 0
+flag_new_app = 1
+for j in range(len(line)):
+    if j == 0:
+        lista.append(line[j])
+    while k != j:
+        if line[j]['app_id'] == line[j - 1 - k]['app_id']:
+            flag_new_app = 0
+        k = k + 1
+    if flag_new_app == 1:
+        lista.append(line[j])
+        pp(line[j])
+    flag_new_app = 1
+    k = 0
+
+#salvo in id gli ID delle app che contengono le query nella descrizione
+for i in range(len(lista)):
+    id.append(lista[i]['app_id'])
+    id_list.write(id[i] + '\n')
+
+#pp(id)
+print(len(id))
+
+#risultato 2564

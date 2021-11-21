@@ -1,0 +1,11 @@
+#questo script serve per cancellare le colonne che a noi non servono
+import pandas as pd
+#data = pd.read_excel('edu_games.xlsx')
+data = pd.read_excel('edu_games_con_filtri.xlsx')
+cancelled_column = ['icon','screenshots','video','histogram','description_html','recent_changes','editors_choice',
+                    'price','free','iap','developer_id','updated','size','current_version','required_android_version',
+                    'content_rating','iap_range','interactive_elements','developer','developer_email','developer_url',
+                    'developer_address']
+
+data = data.drop(cancelled_column,axis=1)
+data.to_excel('edu_games_con_filtri.xlsx')

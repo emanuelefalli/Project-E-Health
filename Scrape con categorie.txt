@@ -1,0 +1,44 @@
+#Questo script serve per creare la lista finale (edu_apps_final) di app con i requisiti minimi per essere
+#considerate serious game.
+#Partendo dall'elenco di ID selezionati in Search_con_parole, abbiamo scremato id_list_final in primo luogo attraverso 5
+#categorie, poi ulteriormente attraverso score, valutazione e numero di installazioni.
+
+import play_scraper
+import pandas as pd
+import openpyxl
+
+#prendo la lista di ID finale, basata soltanto sulla ricerca nelle descrizioni delle app
+id_list = open("id_list_final.csv",'r')
+ids = id_list.readlines()
+app = list()
+edu_apps_final = list()
+
+#salvo nella lista app tutte le informazioni delle applicazioni (attraverso la funzione details) di cui ho estratto
+#gli ID precedentemente
+for i in range(len(ids)):
+    app.append(play_scraper.details(ids[i].split('\n')[0]))
+
+#scelgo 5 categorie
+categorie =['EDUCATION','GAME_EDUCATIONAL','GAME_PUZZLE','GAME_WORD','MEDICAL']
+
+#qui di seguito effettuo il controllo sulla lista app in base alla "categoria" che compare nei dettagli e
+#successivamente valuto lo score>=3.2, le revieews>=1000 e le intalls>=100000. I parametri selezionati si riferiscono
+#agli Stati Uniti, tale scelta è basata sul fatto che lo store americano ha un bacino d'utenza maggiore e pertanto ci
+#permette una valutazione più accurata.
+#Una volta rispettati tali parametri allora la inserisco nella lista edu_apps_final.
+
+flag_cat = 1;
+for i in range(len(app)):
+    for j in range(len(categorie)):
+        if app[i]['category'][0] == categorie[j]:
+            flag_cat = flag_cat*0
+    if flag_cat == 0:
+        flag_cat = 1
+        if str(app[i]['score']) >= str(3.2) and app[i]['reviews'] >= 100 and str(app[i]['installs']) >= str(10000):
+            edu_apps_final.append(app[i])
+
+print(len(edu_apps_final)) #258
+
+#creo file excel con le app trovate
+df = pd.DataFrame(data=edu_apps_final)
+df.to_excel('edu_games_con_filtri.xlsx')

@@ -1,0 +1,63 @@
+from pprint import pprint
+import pandas as pd
+import re
+data = pd.read_excel('edu_games_con_filtri.xlsx')
+
+#scegliamo una serie di parole (diverse dalla lista usata in Search_con_keywords) che ci serviranno per poter dare una
+#valutazione (male, bene, molto bene) a ciascuna app della nostra lista edu_games.xlsx.
+keywords = ['ADHD',
+            'book learning','brain',
+            'care','conduct disorder','CD','children','child','class',
+            'dyslexia','dysgraphia','dysorthography','dyscalculia','DSA','didactics','disease','disorder',
+            'education','educational','educative','edutainment',
+            'game','geometry',
+            'health','homework',
+            'instruction','instructive',
+            'juvenile',
+            'kid','kids','know','knowledge',
+            'language','language teaching','learn','learning','learning activity','lecturing','lecture',
+            'math','mathematical',
+            'pedagogical','pedagogics','pedagogy','post-traumatic stress disorder','preschool','PTSD','physics',
+            'rehabilitation',
+            'school','schooling','serious','sleep-learning','subject',
+            'teach','teaching','tutorship','test','testing']
+
+PUNTEGGIO = list()
+CONTEGGIO = list()
+
+#questo ciclo for salva in CONTEGGIO il numero di volte in cui le parole di keywords compaiono nelle descrizioni delle
+#app
+for i in range(len(data)):
+    sum = 0
+    words_to_compare = data.iloc[i]['description']
+    for z in range(len(keywords)):
+        conteggio = re.findall(keywords[z],words_to_compare, flags=re.IGNORECASE)
+        sum = sum + len(conteggio)
+    CONTEGGIO.append(sum)
+    #sum = sum/len(words_to_compare)
+    #PROBABILITY.append(round(sum*100,1))
+
+#pprint(PROBABILITY)
+pprint(CONTEGGIO)
+#print(len(PROBABILITY))
+
+#do la valutazione alle app (male, bene, molto bene) in base al valore di CONTEGGIO (<50, <100, >100)
+for i in range(len(CONTEGGIO)):
+    if CONTEGGIO[i] < 50:
+        PUNTEGGIO.append('bad')
+    elif (CONTEGGIO[i] >= (50) and CONTEGGIO[i] < (100)):
+        PUNTEGGIO.append('good')
+    else:
+        PUNTEGGIO.append('very good')
+
+#aggiungere una colonna ulteriore con le due #parole che compaiono di più nella descrizione
+
+
+#df = pd.DataFrame(data=PUNTEGGIO,columns=['punteggio'])
+#df['punteggio'] = PUNTEGGIO
+#df.to_excel('punteggio.xlsx')
+
+df = pd.DataFrame(data=data)
+df['evaluation'] = PUNTEGGIO #gian ha cambiato 'punteggio' in 'evaluation'
+#df.to_excel('edu_games.xlsx')
+df.to_excel('edu_games_con_filtri.xlsx')
