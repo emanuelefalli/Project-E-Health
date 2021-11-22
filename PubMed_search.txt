@@ -1,0 +1,30 @@
+from pymed import PubMed
+import pandas as pd
+
+pubmed = PubMed(tool='ehealth_group01',email='davide.fiorani@mail.polimi.it')
+papers = []
+column = list()
+ids = list()
+
+data = pd.read_excel('edu_games.xlsx')
+articles = open("articles.xlsx", 'w')
+
+for i in range(len(data)):
+    column.append(data.iloc[i]['title'])
+
+df = pd.DataFrame(columns=column)
+df.to_excel('articles.xlsx')
+
+for i in range(len(data)):
+    results = pubmed.query(data.iloc[i]['title'], max_results=150)
+    for res in results:
+        papers.append(res.toDict())
+    for paper in range(len(papers)):
+        ids.append(papers[paper]['pubmed_id'].split('\n')[0])
+    if len(ids) < 150:
+        while len(ids) != 150:
+            ids.append('NaN')
+    df[data.iloc[i]['title']] = ids
+    df.to_excel('articles.xlsx')
+    ids = []
+    papers = []
