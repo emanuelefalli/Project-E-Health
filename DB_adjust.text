@@ -1,0 +1,40 @@
+import pandas as pd
+from pymed import PubMed
+
+pubmed = PubMed(tool='ehealth_group01',email='davide.fiorani@mail.polimi.it')
+
+data = pd.read_excel('edu_games_con_filtri.xlsx')
+articles = pd.read_excel("articles_titolo_completo.xlsx")
+
+df1 = pd.DataFrame(data = data)
+df2 = pd.DataFrame(data = articles)
+
+#df = pd.concat([df1,df2.T],axis=1)
+#df.to_excel('prova.xlsx')
+
+papers = list()
+max_app = 300
+'''
+df = pd.DataFrame(data=data)
+df['categoria'] = ''
+df.to_excel('edu_games_con_filtri.xlsx')
+'''
+
+for i in range(len(data)):
+    j = 0
+    if data.iloc[i]['evaluation'] == 'very good':
+        titolo = str(data.iloc[i]['title'])
+        print(articles.iloc[1][titolo])
+        if str(articles.iloc[1][titolo]) == "nan":
+            results = pubmed.query('"' + str(data.iloc[i]['categoria']) + '"' + 'AND (app OR apps OR virtual tool*) AND (kid OR kids OR child* OR baby OR babies OR juvenile)',max_results=max_app)
+            for res in results:
+                papers.append(res.toDict())
+            for paper in range(len(papers)):
+                if str(papers[paper]['publication_date']) > str(2016):
+                    new_id = papers[paper]['pubmed_id'].split('\n')[0]
+                    df2[articles.iloc[j][titolo]] = new_id
+                    j+1
+            #if j < max_app:
+             #   while j != max_app:
+              #      df[articles.iloc[j][titolo]] = 'NaN'
+            df2.to_excel('articles_ids.xlsx')
