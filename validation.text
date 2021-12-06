@@ -1,0 +1,127 @@
+import re
+import openpyxl
+from openpyxl import Workbook
+from openpyxl.styles import Color, PatternFill, Font, Border
+from openpyxl.styles import colors
+from openpyxl.cell import Cell
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup as bs
+
+data = pd.read_excel('edu_games_con_filtri.xlsx')
+articles = pd.read_excel('articles_ids_final.xlsx')
+
+df_data = pd.DataFrame(data=data)
+df_articles = pd.DataFrame(data=articles)
+
+MetaAnalysis = open('META_ANALYSIS.txt','r')
+MetaAnalysis_words = MetaAnalysis.readlines()
+
+Rct = open('RCT.txt','r')
+Rct_words = Rct.readlines()
+
+ObservationalStudy = open('OBSERVATIONAL_STUDY.txt','r')
+ObservationalStudy_words = ObservationalStudy.readlines()
+
+SystematicReviw = open('SYSTEMATIC_REVIEW.txt','r')
+SystematicReviw_words = SystematicReviw.readlines()
+
+
+ids = list()
+ids_meta = list()
+file_abstract = open("abstract1.txt", "w")
+abstract = list()
+sum = 0
+Abstract = "Abstract"
+
+'''
+for i in range(len(articles.iloc[1])-1):
+    for j in range(len(articles)):
+        #print(articles.iloc[j][i+1])
+        if str(articles.iloc[j][i+1]) != "nan":
+            ids.append(articles.iloc[j][i+1])
+
+
+for i in range(len(ids)):
+    url = requests.get('https://pubmed.ncbi.nlm.nih.gov/' + str(ids[i]) + '/')
+    contenuto = bs(url.text, 'html5lib')#'xhtml.parser')
+    abstract_presence = contenuto.find("h2", {"class":"title"})
+    #print(abstract_presence.text)
+    if (abstract_presence.text.strip()) == Abstract:
+        contenuto1 = contenuto.find("div", {"class":"abstract-content selected","id":"enc-abstract"})
+        # file_abstract.write(str(ids[i]) + str(contenuto1.text.encode("utf-8")))
+        #print(contenuto1.text)
+        abstract.append(contenuto1.text)  # .encode("utf-8"))
+
+
+print('ARTICOLI CON META-ANALISI')
+for z in range(len(abstract)):
+    for k in range(len(words_to_compare)):
+        conteggio = re.findall(words_to_compare[k], abstract[z], flags=re.IGNORECASE)
+        # print(conteggio)
+        sum = sum + len(conteggio)
+    if sum > 0:
+        ids_meta.append(ids[z])
+        #print(abstract[z])
+        sum = 0
+
+redFill = PatternFill(start_color='FFFF0000',end_color='FFFF0000')#,fill_type='solid')
+for i in range(len(articles.iloc[1])-1):
+    for j in range(len(articles)):
+        for z in range(len(ids_meta)):
+            if articles.iloc[j][i+1] == ids_meta[z]:
+                wb = openpyxl.Workbook()
+                ws = wb.active
+
+                ws[articles.iloc[j][i + 1]].fill = redFill
+                wb.save('articles_titolo_completo.xlsx')
+'''
+
+for i in range(len(df_articles.columns)):
+    titolo = df_articles.loc[0,i]
+    for j in range(len(df_articles)):
+        id_articolo = df_articles.loc[j,i]
+        df_data.loc[i,'articolo' + str(i+1)] = id_articolo
+        url = requests.get('https://pubmed.ncbi.nlm.nih.gov/' + str(id_articolo) + '/')
+        URL = bs(url.text, 'html5lib')  # 'xhtml.parser')
+        abstract_presence = URL.find("h2", {"class": "title"})
+        # print(abstract_presence.text)
+        if (abstract_presence.text.strip()) == Abstract:
+            contenuto = URL.find("div", {"class": "abstract-content selected", "id": "enc-abstract"})
+            abstract = contenuto.text
+        for k in range(len(MetaAnalysis_words)):
+            conteggio = re.findall(MetaAnalysis_words[k], abstract, flags=re.IGNORECASE)
+            # print(conteggio)
+            sum = sum + len(conteggio)
+        if sum > 0:
+            df_data.loc[i,'validazione articolo' + str(i+1)] = 'Meta-Analysis'
+            # print(abstract[z])
+            sum = 0
+            break
+        for k in range(len(Rct_words)):
+            conteggio = re.findall(Rct_words[k], abstract, flags=re.IGNORECASE)
+            # print(conteggio)
+            sum = sum + len(conteggio)
+        if sum > 0:
+            df_data.loc[i,'validazione articolo' + str(i+1)] = 'RCT'
+            # print(abstract[z])
+            sum = 0
+            break
+        for k in range(len(SystematicReviw_words)):
+            conteggio = re.findall(SystematicReviw_words[k], abstract, flags=re.IGNORECASE)
+            # print(conteggio)
+            sum = sum + len(conteggio)
+        if sum > 0:
+            df_data.loc[i,'validazione articolo' + str(i+1)] = 'Systematic Review'
+            # print(abstract[z])
+            sum = 0
+            break
+        for k in range(len(ObservationalStudy_words)):
+            conteggio = re.findall(ObservationalStudy_words[k], abstract, flags=re.IGNORECASE)
+            # print(conteggio)
+            sum = sum + len(conteggio)
+        if sum > 0:
+            df_data.loc[i,'validazione articolo' + str(i+1)] = 'Observational Study'
+            # print(abstract[z])
+            sum = 0
+            break
