@@ -1,0 +1,304 @@
+from pprint import pprint
+
+import dash
+import pandas as pd
+from dash import dcc
+from dash import html
+
+
+DB_EDUCATION = pd.read_excel('DB_EDUCATION.xlsx')
+df_education = pd.DataFrame(DB_EDUCATION)
+
+DB_MEDICAL = pd.read_excel('DB_MEDICAL.xlsx')
+df_medical = pd.DataFrame(DB_MEDICAL)
+
+DB_GAMEPUZZLE = pd.read_excel('DB_GAMEPUZZLE.xlsx')
+df_gamepuzzle = pd.DataFrame(DB_GAMEPUZZLE)
+
+DB_GAMEEDUCATIONAL = pd.read_excel('DB_GAMEEDUCATIONAL.xlsx')
+df_gameeducational = pd.DataFrame(DB_GAMEEDUCATIONAL)
+
+medical_app = list()
+medical_app_art = list()
+medical_app_articles = {}
+medical_app_art_val = list()
+medical_app_articles_validation = {}
+education_app = list()
+education_app_art = list()
+education_app_articles = {}
+education_app_art_val = list()
+education_app_articles_validation = {}
+puzzle_app = list()
+puzzle_app_art = list()
+puzzle_app_articles = {}
+puzzle_app_art_val = list()
+puzzle_app_articles_validation = {}
+educational_app = list()
+educational_app_art = list()
+educational_app_articles = {}
+educational_app_art_val = list()
+educational_app_articles_validation = {}
+all_validation = {}
+
+
+for i in range(len(df_medical)):
+    medical_app.append(df_medical.iloc[i]['title'])
+    num_art = df_medical.iloc[i]['#art']
+    for j in range((num_art)):
+        medical_app_art.append(df_medical.iloc[i]['articolo'+ str(j+1)])
+        medical_app_art_val.append(df_medical.iloc[i]['validazione articolo' + str(j + 1)])
+        all_validation[df_medical.iloc[i]['articolo' + str(j + 1)]] = df_medical.iloc[i][
+            'validazione articolo' + str(j + 1)]
+    medical_app_articles[df_medical.iloc[i]['title']] = (medical_app_art)
+    medical_app_art = []
+    #medical_app_articles_validation[i] = medical_app_art_val
+    #medical_app_art_val = []
+#pprint(medical_app_articles)
+
+for i in range(len(df_education)):
+    education_app.append(df_education.iloc[i]['title'])
+    num_art = df_education.iloc[i]['#art']
+    for j in range((num_art)):
+        education_app_art.append(df_education.iloc[i]['articolo'+ str(j+1)])
+        education_app_art_val.append(df_education.iloc[i]['validazione articolo' + str(j + 1)])
+        all_validation[df_education.iloc[i]['articolo'+ str(j+1)]] = df_education.iloc[i]['validazione articolo' + str(j + 1)]
+    education_app_articles[df_education.iloc[i]['title']] = (education_app_art)
+    education_app_art = []
+    #education_app_articles_validation[i] = education_app_art_val
+    #education_app_art_val = []
+
+for i in range(len(df_gamepuzzle)):
+    puzzle_app.append(df_gamepuzzle.iloc[i]['title'])
+    num_art = df_gamepuzzle.iloc[i]['#art']
+    for j in range((num_art)):
+        puzzle_app_art.append(df_gamepuzzle.iloc[i]['articolo' + str(j + 1)])
+        puzzle_app_art_val.append(df_gamepuzzle.iloc[i]['validazione articolo' + str(j + 1)])
+        all_validation[df_gamepuzzle.iloc[i]['articolo' + str(j + 1)]] = df_gamepuzzle.iloc[i][
+            'validazione articolo' + str(j + 1)]
+    puzzle_app_articles[df_gamepuzzle.iloc[i]['title']] = (puzzle_app_art)
+    puzzle_app_art = []
+    #puzzle_app_articles_validation[i] = puzzle_app_art_val
+    #puzzle_app_art_val = []
+
+for i in range(len(df_gameeducational)):
+    educational_app.append(df_gameeducational.iloc[i]['title'])
+    num_art = df_gameeducational.iloc[i]['#art']
+    for j in range((num_art)):
+        educational_app_art.append(df_gameeducational.iloc[i]['articolo' + str(j + 1)])
+        educational_app_art_val.append(df_gameeducational.iloc[i]['validazione articolo' + str(j + 1)])
+        all_validation[df_gameeducational.iloc[i]['articolo' + str(j + 1)]] = df_gameeducational.iloc[i][
+            'validazione articolo' + str(j + 1)]
+    educational_app_articles[df_gameeducational.iloc[i]['title']] = (educational_app_art)
+    educational_app_art = []
+    #educational_app_articles_validation[i] = educational_app_art_val
+    #educational_app_art_val = []
+
+'''app = dash.Dash(__name__)
+app.layout = html.Div(
+    children=[
+        html.H1(children="Dashboard",),
+        html.P(
+            children="Serious game on the play store"
+            ,
+        ),
+        dcc.Graph(
+            figure={
+                "df_medical": [
+                    {
+                        "x": df_medical.iloc[:,df_medical.columns.get_loc('title')],
+                        "y": df_medical.iloc[:,df_medical.columns.get_loc('#art')],
+                        "type": "lines",
+                    },
+                ],
+                "layout": {"title": "Number of articles in Medical Apps"},
+            },
+        ),
+        dcc.Graph(
+            figure={
+                "df_education": [
+                    {
+                        "x": df_education.iloc[:,df_education.columns.get_loc('title')],
+                        "y": df_education.iloc[:,df_education.columns.get_loc('#art')],
+                        "type": "lines",
+                    },
+                ],
+                "layout": {"title": "Number of articles in Education Apps"},
+            },
+        ),
+    ]
+)
+
+if __name__ == "__main__":
+    app.run_server(debug=True)'''
+
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+
+
+from dash.dependencies import Input, Output
+array = ['Medical', 'Education', 'Game Puzzle', 'Game Educational']
+'''
+app.layout = html.Div([
+    dcc.Dropdown(
+    id='seleziona categoria',
+    options=[
+        {'label': x, 'value': x}
+        for x in array
+        ],
+    value='value'
+    ),
+    html.Div(id='categoria')
+])
+
+#app.layout = html.Div([
+#layout1,
+#layout2,
+#layout3
+#])
+
+@app.callback(
+    Output('categoria', 'children'),
+    Input('seleziona categoria', 'value')
+)
+
+def update_output(value):
+    app_output = list()
+    #print(value)
+    if value == 'Medical':
+        app_output = df_medical['title']
+    if value == 'Education':
+        for i in range(len(df_education)):
+            app_output.append(df_education.iloc[i]['title'] + '\n')
+    if value == 'Medical':
+        app_output = df_medical['title']
+    return app_output
+    #return 'You have selected "{}"'.format(value)
+
+if __name__ == '__main__':
+    app.run_server(debug=True)
+'''
+
+all_categories = {
+    'Medical': medical_app,
+    'Education': education_app,
+    'Puzzle': puzzle_app,
+    'Educational': educational_app,
+}
+
+all_articles = {
+    'Medical': medical_app_articles,
+    'Education': education_app_articles,
+    'Puzzle' :  puzzle_app_articles,
+    'Educational' : educational_app_articles}
+#
+#all_validation = [medical_app_articles_validation,
+ #                 education_app_articles_validation,
+  #                puzzle_app_articles_validation,
+   #               educational_app_articles_validation]
+
+pprint(all_validation)
+app.layout = html.Div([
+    dcc.RadioItems(
+        id='categories',
+        options=[{'label': k, 'value': k} for k in all_categories.keys()]#,
+        #value='Medical'
+    ),
+
+    html.Hr(),
+
+    dcc.RadioItems(
+        id='app',
+        options=[]
+    ),
+
+    html.Hr(),
+
+    dcc.RadioItems(
+        id='articles',
+        options=[]
+        #options=[{'label': k, 'value': k} for k in all_articles],
+        #value=all_articles[0].keys()
+    ),
+
+    html.Hr(),
+
+    html.Div(id='display validation')
+])
+
+@app.callback(
+    Output('app', 'options'),
+    Input('categories', 'value'))
+def set_category(selected_category):
+    return [{'label': i, 'value': i} for i in all_categories[selected_category]]
+
+@app.callback(
+    Output('app', 'value'),
+    Input('app', 'options'))
+def set_app_values(available_options_app):
+    return available_options_app[0]['value']
+
+@app.callback(
+    Output('articles', 'options'),
+    Input('categories', 'value'),
+    Input('app', 'value'))
+def set_articles(category, selected_app):
+    #if category == 'Medical':
+    #return [{'label': i, 'value': i} for i in medical_app_articles[selected_app]]
+    return [{'label': i, 'value': i} for i in all_articles[category][selected_app]]
+
+
+    '''
+        if selected_category == 'Education':
+        return [{'label': i, 'value': i} for i in medical_app_articles[selected_app]]
+    if selected_category == 'Medical':
+        return [{'label': i, 'value': i} for i in medical_app_articles[selected_app]]
+    if selected_category == 'Medical':
+        return [{'label': i, 'value': i} for i in medical_app_articles[selected_app]]
+    #return [{'label': i, 'value': i} for i in all_articles[selected_category].values([selected_app])]
+'''
+
+@app.callback(
+    Output('articles', 'value'),
+    Input('articles', 'options'))
+def set_articles_values(available_options_articles):
+    return available_options_articles[0]['value']
+
+@app.callback(
+    Output('display validation', 'children'),
+    Input('articles', 'value'))
+def display_validation(selected_article):
+    return u'VALIDATION:{}'.format(
+        all_validation[selected_article]
+    )
+    #if category == 'Medical':
+    #return [{'label': i, 'value': i} for i in medical_app_articles[selected_app]]
+    #return [{'label': i, 'value': i} for i in all_validation[selected_article]]
+
+'''
+@app.callback(
+    Output('articles', 'options'),
+    Input('app', 'value'))
+def set_app(selected_app):
+    return [{'label': i, 'value': i} for i in all_categories[selected_app]]
+'''
+
+'''
+@app.callback(
+    Output('articles', 'children'),
+    Input('app', 'value'))
+def set_display_articles(all_articles):
+    return all_articles[0]['value']
+
+@app.callback(
+    Output('display-selected-values', 'children'),
+    Input('categories', 'value'),
+    Input('app', 'value'))
+def set_display_children(selected_category, selected_app):
+    return u'{} is an app in {}'.format(
+        selected_app, selected_category,
+    )
+'''
+
+if __name__ == '__main__':
+    app.run_server()
