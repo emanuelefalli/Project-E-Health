@@ -1,40 +1,223 @@
 import pandas as pd
 from pymed import PubMed
 
-pubmed = PubMed(tool='ehealth_group01',email='davide.fiorani@mail.polimi.it')
+pubmed = PubMed(tool='ehealth_group01', email='davide.fiorani@mail.polimi.it')
 
-data = pd.read_excel('edu_games_con_filtri.xlsx')
-articles = pd.read_excel("articles_titolo_completo.xlsx")
+data = pd.read_excel('edu_games_con_filtri.xlsx', index_col=0)
+articles = pd.read_excel("articles_ids.xlsx", index_col=0)  # forse è meglio partire dal database già ristretto?
 
-df1 = pd.DataFrame(data = data)
-df2 = pd.DataFrame(data = articles)
+df1 = pd.DataFrame(data=data)
+df2 = pd.DataFrame(data=articles)
 
-#df = pd.concat([df1,df2.T],axis=1)
-#df.to_excel('prova.xlsx')
+papers = []
+max_app = 20
+new_ids = []
+z = 0
+target = []
 
-papers = list()
-max_app = 300
-'''
-df = pd.DataFrame(data=data)
-df['categoria'] = ''
-df.to_excel('edu_games_con_filtri.xlsx')
-'''
+dyslexia = ['Auditory Discrimination Problem',
+            'Auditory Processing Disorder',
+            'Central Auditory Processing Disorder (CAPD)',
+            'Orthographic Deficit',
+            'Difficulty remembering spelling patterns',
+            'Dysgraphia',
+            'Dysnomia',
+            'Dysphonetic Deficit',
+            'Phonemic Awareness Deficit',
+            'Reading Disability (RD)',
+            'Reading Fluency Problem',
+            'Short-term or Long-term Memory Deficit',
+            'Specific Language Disability (SLD)',
+            'Visual Processing Disorder',
+            'Visual-Motor Integration Disorder',
+            'Visual Memory Deficit',
+            'Visual Tracking Problem',
+            'Visual Convergence Problem',
+            'Vocabulary on Demand Problem',
+            'Word Retrieval Deficit',
+            'Written Language Disorder']
+reading = ['reading']
+speaking = ['speaking', 'chatting', 'communicating', 'communication']
+puzzles = ['riddle', 'game', 'enigmas']
+preschool = ['kindergarten', 'pre-K', 'day-care center']
+counting = ['counting', 'summing', 'adding', 'substraction', 'addition']
+writing = ['writing', 'handwriting', 'script']
+brain_games = ['brain']
+ADHD = ['attention-deficit-hyperactivity-disorder',
+        'hyperactivity',
+        'minimal-brain-dysfunction',
+        'hyperkinetic-syndrome',
+        'add-adhd', 'ad-hd']
 
+
+# targets = ['Dyslexia', 'Reading', 'Math', 'Speaking', 'Puzzles', 'Preschool', 'Counting', 'Writing', 'Brain Games', 'ADHD']
 for i in range(len(data)):
-    j = 0
-    if data.iloc[i]['evaluation'] == 'very good':
-        titolo = str(data.iloc[i]['title'])
-        print(articles.iloc[1][titolo])
-        if str(articles.iloc[1][titolo]) == "nan":
-            results = pubmed.query('"' + str(data.iloc[i]['categoria']) + '"' + 'AND (app OR apps OR virtual tool*) AND (kid OR kids OR child* OR baby OR babies OR juvenile)',max_results=max_app)
-            for res in results:
-                papers.append(res.toDict())
-            for paper in range(len(papers)):
-                if str(papers[paper]['publication_date']) > str(2016):
-                    new_id = papers[paper]['pubmed_id'].split('\n')[0]
-                    df2[articles.iloc[j][titolo]] = new_id
-                    j+1
-            #if j < max_app:
-             #   while j != max_app:
-              #      df[articles.iloc[j][titolo]] = 'NaN'
-            df2.to_excel('articles_ids.xlsx')
+    if df1.iloc[i]['evaluation'] == 'very good':
+        categoria = str(df1.iloc[i, df1.columns.get_loc('categoria')])
+        print(categoria)
+        titolo = str(df1.iloc[i]['title'])
+        if categoria == 'Dyslexia':
+            target = dyslexia
+            for k in range(len(target)):
+                results = pubmed.query(target[k] + '"' + 'AND (kid OR kids OR child* OR baby OR babies OR infant* OR game*)', max_results=max_app)
+                print(titolo)
+                for res in results:
+                    papers.append(res.toDict())
+                # print(papers)
+                for paper in range(len(papers)):
+                    if str(papers[paper]['publication_date']) > str(2012):
+                        new_ids.append(papers[paper]['pubmed_id'].split('\n')[0])
+                for j in range(len(new_ids)):
+                    df2.iloc[z, df2.columns.get_loc(titolo)] = new_ids[j]
+                    print(new_ids[j])
+                    z = z + 1
+                new_ids = []
+                papers = []
+            z = 0
+        elif categoria == 'Reading':
+            target = reading
+            for k in range(len(target)):
+                results = pubmed.query(target[k] + '"' + 'AND (kid OR kids OR child* OR baby OR babies OR infant* OR game*)', max_results=max_app)
+                print(titolo)
+                for res in results:
+                    papers.append(res.toDict())
+                # print(papers)
+                for paper in range(len(papers)):
+                    if str(papers[paper]['publication_date']) > str(2012):
+                        new_ids.append(papers[paper]['pubmed_id'].split('\n')[0])
+                for j in range(len(new_ids)):
+                    df2.iloc[z, df2.columns.get_loc(titolo)] = new_ids[j]
+                    print(new_ids[j])
+                    z = z + 1
+                new_ids = []
+                papers = []
+            z = 0
+        elif categoria == 'Speaking':
+            target = speaking
+            for k in range(len(target)):
+                results = pubmed.query(target[k] + '"' + 'AND (kid OR kids OR child* OR baby OR babies OR infant* OR game*)', max_results=max_app)
+                print(titolo)
+                for res in results:
+                    papers.append(res.toDict())
+                # print(papers)
+                for paper in range(len(papers)):
+                    if str(papers[paper]['publication_date']) > str(2012):
+                        new_ids.append(papers[paper]['pubmed_id'].split('\n')[0])
+                for j in range(len(new_ids)):
+                    df2.iloc[z, df2.columns.get_loc(titolo)] = new_ids[j]
+                    print(new_ids[j])
+                    z = z + 1
+                new_ids = []
+                papers = []
+            z = 0
+        elif categoria == 'Puzzles':
+            target = puzzles
+            for k in range(len(target)):
+                results = pubmed.query(target[k] + '"' + 'AND (kid OR kids OR child* OR baby OR babies OR infant* OR game*)', max_results=max_app)
+                print(titolo)
+                for res in results:
+                    papers.append(res.toDict())
+                # print(papers)
+                for paper in range(len(papers)):
+                    if str(papers[paper]['publication_date']) > str(2012):
+                        new_ids.append(papers[paper]['pubmed_id'].split('\n')[0])
+                for j in range(len(new_ids)):
+                    df2.iloc[z, df2.columns.get_loc(titolo)] = new_ids[j]
+                    print(new_ids[j])
+                    z = z + 1
+                new_ids = []
+                papers = []
+            z = 0
+        elif categoria == 'Preschool':
+            target = preschool
+            for k in range(len(target)):
+                results = pubmed.query(target[k] + '"' + 'AND (kid OR kids OR child* OR baby OR babies OR infant* OR game*)', max_results=max_app)
+                print(titolo)
+                for res in results:
+                    papers.append(res.toDict())
+                # print(papers)
+                for paper in range(len(papers)):
+                    if str(papers[paper]['publication_date']) > str(2012):
+                        new_ids.append(papers[paper]['pubmed_id'].split('\n')[0])
+                for j in range(len(new_ids)):
+                    df2.iloc[z, df2.columns.get_loc(titolo)] = new_ids[j]
+                    print(new_ids[j])
+                    z = z + 1
+                new_ids = []
+                papers = []
+            z = 0
+        elif categoria == 'Counting':
+            target = counting
+            for k in range(len(target)): #
+                results = pubmed.query(target[k] + '"' + 'AND (kid OR kids OR child* OR baby OR babies OR infant* OR game*)', max_results=max_app)
+                print(titolo)
+                for res in results:
+                    papers.append(res.toDict())
+                # print(papers)
+                for paper in range(len(papers)):
+                    if str(papers[paper]['publication_date']) > str(2012):
+                        new_ids.append(papers[paper]['pubmed_id'].split('\n')[0])
+                for j in range(len(new_ids)):
+                    df2.iloc[z, df2.columns.get_loc(titolo)] = new_ids[j]
+                    print(new_ids[j])
+                    z = z + 1
+                new_ids = []
+                papers = []
+            z = 0
+        elif categoria == 'Writing':
+            target = writing
+            for k in range(len(target)):
+                results = pubmed.query(target[k] + '"' + 'AND (kid OR kids OR child* OR baby OR babies OR infant* OR game*)', max_results=max_app)
+                print(titolo)
+                for res in results:
+                    papers.append(res.toDict())
+                # print(papers)
+                for paper in range(len(papers)):
+                    if str(papers[paper]['publication_date']) > str(2012):
+                        new_ids.append(papers[paper]['pubmed_id'].split('\n')[0])
+                for j in range(len(new_ids)):
+                    df2.iloc[z, df2.columns.get_loc(titolo)] = new_ids[j]
+                    print(new_ids[j])
+                    z = z + 1
+                new_ids = []
+                papers = []
+            z = 0
+        elif categoria == 'Brain Games':
+            target = brain_games
+            for k in range(len(target)):
+                results = pubmed.query(target[k] + '"' + 'AND (kid OR kids OR child* OR baby OR babies OR infant* OR game*)', max_results=max_app)
+                print(titolo)
+                for res in results:
+                    papers.append(res.toDict())
+                # print(papers)
+                for paper in range(len(papers)):
+                    if str(papers[paper]['publication_date']) > str(2012):
+                        new_ids.append(papers[paper]['pubmed_id'].split('\n')[0])
+                for j in range(len(new_ids)):
+                    df2.iloc[z, df2.columns.get_loc(titolo)] = new_ids[j]
+                    print(new_ids[j])
+                    z = z + 1
+                new_ids = []
+                papers = []
+            z = 0
+        elif categoria == 'ADHD':
+            target = ADHD
+            for k in range(len(target)):
+                results = pubmed.query(target[k] + '"' + 'AND (kid OR kids OR child* OR baby OR babies OR infant* OR game*)', max_results=max_app)
+                print(titolo)
+                for res in results:
+                    papers.append(res.toDict())
+                # print(papers)
+                for paper in range(len(papers)):
+                    if str(papers[paper]['publication_date']) > str(2012):
+                        new_ids.append(papers[paper]['pubmed_id'].split('\n')[0])
+                for j in range(len(new_ids)):
+                    df2.iloc[z, df2.columns.get_loc(titolo)] = new_ids[j]
+                    print(new_ids[j])
+                    z = z + 1
+                new_ids = []
+                papers = []
+            z = 0
+df2.to_excel('articles.xlsx')
+
+# str(data.iloc[i]['categoria']), '"' + 'AND (app OR apps OR virtual tool*) AND (kid OR kids OR child* OR baby OR babies OR infant*)
