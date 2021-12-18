@@ -1,143 +1,29 @@
+import json
 from pprint import pprint
 
 import dash
 import pandas as pd
 from dash import dcc
 from dash import html
-
-
-DB_EDUCATION = pd.read_excel('DB_EDUCATION.xlsx')
-df_education = pd.DataFrame(DB_EDUCATION)
-
-DB_MEDICAL = pd.read_excel('DB_MEDICAL.xlsx')
-df_medical = pd.DataFrame(DB_MEDICAL)
-
-DB_GAMEPUZZLE = pd.read_excel('DB_GAMEPUZZLE.xlsx')
-df_gamepuzzle = pd.DataFrame(DB_GAMEPUZZLE)
-
-DB_GAMEEDUCATIONAL = pd.read_excel('DB_GAMEEDUCATIONAL.xlsx')
-df_gameeducational = pd.DataFrame(DB_GAMEEDUCATIONAL)
-
-medical_app = list()
-medical_app_art = list()
-medical_app_articles = {}
-medical_app_art_val = list()
-medical_app_articles_validation = {}
-education_app = list()
-education_app_art = list()
-education_app_articles = {}
-education_app_art_val = list()
-education_app_articles_validation = {}
-puzzle_app = list()
-puzzle_app_art = list()
-puzzle_app_articles = {}
-puzzle_app_art_val = list()
-puzzle_app_articles_validation = {}
-educational_app = list()
-educational_app_art = list()
-educational_app_articles = {}
-educational_app_art_val = list()
-educational_app_articles_validation = {}
-all_validation = {}
-
-
-for i in range(len(df_medical)):
-    medical_app.append(df_medical.iloc[i]['title'])
-    num_art = df_medical.iloc[i]['#art']
-    for j in range((num_art)):
-        medical_app_art.append(df_medical.iloc[i]['articolo'+ str(j+1)])
-        medical_app_art_val.append(df_medical.iloc[i]['validazione articolo' + str(j + 1)])
-        all_validation[df_medical.iloc[i]['articolo' + str(j + 1)]] = df_medical.iloc[i][
-            'validazione articolo' + str(j + 1)]
-    medical_app_articles[df_medical.iloc[i]['title']] = (medical_app_art)
-    medical_app_art = []
-    #medical_app_articles_validation[i] = medical_app_art_val
-    #medical_app_art_val = []
-#pprint(medical_app_articles)
-
-for i in range(len(df_education)):
-    education_app.append(df_education.iloc[i]['title'])
-    num_art = df_education.iloc[i]['#art']
-    for j in range((num_art)):
-        education_app_art.append(df_education.iloc[i]['articolo'+ str(j+1)])
-        education_app_art_val.append(df_education.iloc[i]['validazione articolo' + str(j + 1)])
-        all_validation[df_education.iloc[i]['articolo'+ str(j+1)]] = df_education.iloc[i]['validazione articolo' + str(j + 1)]
-    education_app_articles[df_education.iloc[i]['title']] = (education_app_art)
-    education_app_art = []
-    #education_app_articles_validation[i] = education_app_art_val
-    #education_app_art_val = []
-
-for i in range(len(df_gamepuzzle)):
-    puzzle_app.append(df_gamepuzzle.iloc[i]['title'])
-    num_art = df_gamepuzzle.iloc[i]['#art']
-    for j in range((num_art)):
-        puzzle_app_art.append(df_gamepuzzle.iloc[i]['articolo' + str(j + 1)])
-        puzzle_app_art_val.append(df_gamepuzzle.iloc[i]['validazione articolo' + str(j + 1)])
-        all_validation[df_gamepuzzle.iloc[i]['articolo' + str(j + 1)]] = df_gamepuzzle.iloc[i][
-            'validazione articolo' + str(j + 1)]
-    puzzle_app_articles[df_gamepuzzle.iloc[i]['title']] = (puzzle_app_art)
-    puzzle_app_art = []
-    #puzzle_app_articles_validation[i] = puzzle_app_art_val
-    #puzzle_app_art_val = []
-
-for i in range(len(df_gameeducational)):
-    educational_app.append(df_gameeducational.iloc[i]['title'])
-    num_art = df_gameeducational.iloc[i]['#art']
-    for j in range((num_art)):
-        educational_app_art.append(df_gameeducational.iloc[i]['articolo' + str(j + 1)])
-        educational_app_art_val.append(df_gameeducational.iloc[i]['validazione articolo' + str(j + 1)])
-        all_validation[df_gameeducational.iloc[i]['articolo' + str(j + 1)]] = df_gameeducational.iloc[i][
-            'validazione articolo' + str(j + 1)]
-    educational_app_articles[df_gameeducational.iloc[i]['title']] = (educational_app_art)
-    educational_app_art = []
-    #educational_app_articles_validation[i] = educational_app_art_val
-    #educational_app_art_val = []
-
-'''app = dash.Dash(__name__)
-app.layout = html.Div(
-    children=[
-        html.H1(children="Dashboard",),
-        html.P(
-            children="Serious game on the play store"
-            ,
-        ),
-        dcc.Graph(
-            figure={
-                "df_medical": [
-                    {
-                        "x": df_medical.iloc[:,df_medical.columns.get_loc('title')],
-                        "y": df_medical.iloc[:,df_medical.columns.get_loc('#art')],
-                        "type": "lines",
-                    },
-                ],
-                "layout": {"title": "Number of articles in Medical Apps"},
-            },
-        ),
-        dcc.Graph(
-            figure={
-                "df_education": [
-                    {
-                        "x": df_education.iloc[:,df_education.columns.get_loc('title')],
-                        "y": df_education.iloc[:,df_education.columns.get_loc('#art')],
-                        "type": "lines",
-                    },
-                ],
-                "layout": {"title": "Number of articles in Education Apps"},
-            },
-        ),
-    ]
-)
-
-if __name__ == "__main__":
-    app.run_server(debug=True)'''
-
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-
-
 from dash.dependencies import Input, Output
+import dash_bootstrap_components as dbc
+
+#external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.FLATLY])
+
+DB = pd.read_excel('DATABASE.xlsx')
+ARTICOLI = pd.read_excel('DB_ARTICOLI.xlsx')
+
+df_DB = pd.DataFrame(DB)
+df_ARTICOLI= pd.DataFrame(ARTICOLI)
+
+
 array = ['Medical', 'Education', 'Game Puzzle', 'Game Educational']
+apps = list()
+id_art = list()
+articles = list()
+val_list = list()
 '''
 app.layout = html.Div([
     dcc.Dropdown(
@@ -178,7 +64,7 @@ def update_output(value):
 if __name__ == '__main__':
     app.run_server(debug=True)
 '''
-
+'''
 all_categories = {
     'Medical': medical_app,
     'Education': education_app,
@@ -196,25 +82,26 @@ all_articles = {
  #                 education_app_articles_validation,
   #                puzzle_app_articles_validation,
    #               educational_app_articles_validation]
-
-pprint(all_validation)
+'''
+#pprint(all_validation)
+'''
 app.layout = html.Div([
-    dcc.RadioItems(
+    dcc.Dropdown(#RadioItems(
         id='categories',
-        options=[{'label': k, 'value': k} for k in all_categories.keys()]#,
+        options=[{'label': k, 'value': k} for k in df_DB['category'].unique()]#,
         #value='Medical'
     ),
 
     html.Hr(),
 
-    dcc.RadioItems(
+    dcc.Dropdown(#RadioItems(
         id='app',
         options=[]
     ),
 
     html.Hr(),
 
-    dcc.RadioItems(
+    dcc.Dropdown(#RadioItems(
         id='articles',
         options=[]
         #options=[{'label': k, 'value': k} for k in all_articles],
@@ -223,82 +110,228 @@ app.layout = html.Div([
 
     html.Hr(),
 
-    html.Div(id='display validation')
+    html.Div(id='display information')
 ])
+'''
+
+import plotly.express as px
+
+'''
+app.layout = html.Div([
+    html.H1(children=[html.Label('Select a category'),
+    dcc.Dropdown(#RadioItems(
+        id='categories',
+        options=[{'label': k, 'value': k} for k in df_DB['category'].unique()])]#,
+        #value='Medical'
+    dcc.Graph(
+        id='graph article',
+        figure={})),
+
+    html.Hr(),
+
+    html.Div(children=[html.Label('Select an app'),
+    dcc.Dropdown(#RadioItems(
+        id='app',
+        options=[]
+    )]),
+
+    html.Hr(),
+
+    html.Div(children=[html.Label('Select an article'),
+    dcc.Dropdown(#RadioItems(
+        id='articles',
+        options=[]
+        #options=[{'label': k, 'value': k} for k in all_articles],
+        #value=all_articles[0].keys()
+    )]),
+
+    html.Hr(),
+
+    html.Div(id='display information')
+])
+
+row = html.Div(
+    [
+        dbc.Row(dbc.Col( width=6)),
+        dbc.Row(dbc.Col( width=6)
+        ),
+        dbc.Row(
+            [
+                dbc.Col( width=3),
+                #dbc.Col(),
+                #dbc.Col( width=3),
+            ]
+        ),
+    ]
+)
+'''
+
+app.layout = html.Div([html.H1("DASHBOARD"),
+    html.Div(children=[html.Label('Select a category'),
+    dcc.Dropdown(#RadioItems(
+        id='categories',
+        options=[{'label': k, 'value': k} for k in sorted(df_DB['category'].unique())]),#,df_DB['category'].unique()
+        #value='Medical'
+    #style={'padding': 10, 'flex': 1},
+    dcc.Graph(
+        id='graph article',
+        figure={})]),
+
+    html.Hr(),
+
+    html.Div(children=[html.Label('Select an app'),
+    dcc.Dropdown(#RadioItems(
+        id='app',
+        options=[]
+    )]),
+
+    html.Hr(),
+
+    html.Div(id='display app'),
+
+    html.Hr(),
+
+    html.Div(dcc.Graph(
+        id='graph validation',
+        figure={}),
+    ),
+    html.Hr(),
+
+    html.Div(children=[html.Label('Select an article'),
+    dcc.Dropdown(#RadioItems(
+        id='articles',
+        options=[]
+        #options=[{'label': k, 'value': k} for k in all_articles],
+        #value=all_articles[0].keys()
+    ),
+    ]),
+
+    html.Hr(),
+
+    html.Div(id='display information article')
+
+])
+
+@app.callback(
+    Output('graph article', 'figure'),
+    Input('categories','value'))
+def interactive(sel_cat):
+    dff = df_DB[df_DB['category'] == sel_cat]#dff = df_DB[df_DB['category'] == sel_cat]
+    fig = px.bar(dff, x='title', y=["#obs", "#rct", "#sys", "#meta"])#, text='pop')#color=validation') #fig = px.bar(dff, x='title', y='#art')
+    return fig
+
 
 @app.callback(
     Output('app', 'options'),
     Input('categories', 'value'))
 def set_category(selected_category):
-    return [{'label': i, 'value': i} for i in all_categories[selected_category]]
+    apps.clear()
+    dff = df_DB[df_DB['category'] == selected_category]
+    return [{'label': i, 'value': i} for i in dff['title'].unique()]
 
 @app.callback(
-    Output('app', 'value'),
-    Input('app', 'options'))
-def set_app_values(available_options_app):
-    return available_options_app[0]['value']
-
-@app.callback(
-    Output('articles', 'options'),
-    Input('categories', 'value'),
-    Input('app', 'value'))
-def set_articles(category, selected_app):
-    #if category == 'Medical':
-    #return [{'label': i, 'value': i} for i in medical_app_articles[selected_app]]
-    return [{'label': i, 'value': i} for i in all_articles[category][selected_app]]
-
-
-    '''
-        if selected_category == 'Education':
-        return [{'label': i, 'value': i} for i in medical_app_articles[selected_app]]
-    if selected_category == 'Medical':
-        return [{'label': i, 'value': i} for i in medical_app_articles[selected_app]]
-    if selected_category == 'Medical':
-        return [{'label': i, 'value': i} for i in medical_app_articles[selected_app]]
-    #return [{'label': i, 'value': i} for i in all_articles[selected_category].values([selected_app])]
-'''
-
-@app.callback(
-    Output('articles', 'value'),
-    Input('articles', 'options'))
-def set_articles_values(available_options_articles):
-    return available_options_articles[0]['value']
-
-@app.callback(
-    Output('display validation', 'children'),
-    Input('articles', 'value'))
-def display_validation(selected_article):
-    return u'VALIDATION:{}'.format(
-        all_validation[selected_article]
+    Output('display app', 'children'),
+    Input('app','value'))
+def info_app(selected_app):
+    #df1 = df_DB[df_DB['title'] == selected_app]
+    dff = df_DB[df_DB['title'] == selected_app]
+    return u'TITLE: {} \n' \
+           u'CATEGORY: {} \n' \
+           u'SCORE: {} \n' \
+           u'REVIEWS: {} \n' \
+           u'INSTALLS: {} \n' \
+           u'URL: {}\n' .format(
+        dff['title'].values[0],
+        dff['category'].values[0],
+        dff['score'].values[0],
+        dff['reviews'].values[0],
+        dff['installs'].values[0],
+        dff['url'].values[0]
     )
-    #if category == 'Medical':
-    #return [{'label': i, 'value': i} for i in medical_app_articles[selected_app]]
-    #return [{'label': i, 'value': i} for i in all_validation[selected_article]]
 
 '''
+return u'TITLE: {}\r\n' \
+       u'CATEGORY: {}\r\n' \
+       u'INSTALLS: {}\r\n' \
+       u'REVIEW: {}\r\n' \
+       u'SCORE: {}\r\n' \
+       u'URL: {}\r\n'.format(
+    df1['title'].unique(),
+    df1['category'].unique(),
+    df1['installs'].unique(),
+    df1['review'].unique(),
+    df1['score'].unique(),
+    df1['url'].unique()
+)
+'''
+
+
 @app.callback(
     Output('articles', 'options'),
     Input('app', 'value'))
 def set_app(selected_app):
-    return [{'label': i, 'value': i} for i in all_categories[selected_app]]
+    articles.clear()
+    dff = df_ARTICOLI[df_ARTICOLI['title app'] == selected_app]
+    return [{'label': i, 'value': i} for i in dff['title'].unique()]
+
+    '''
+    for k in range(len(df_DB)):
+        if df_DB['title'].values[k] == selected_app:
+            n_art = df_DB['#art'].values[k]
+            for j in range(n_art):
+                id = df_DB['articolo' + str(j+1)].values[k]
+                for z in range(len(df_ARTICOLI)):
+                    if df_ARTICOLI['id'].values[z] == id:
+                        articles.append(df_ARTICOLI['title'].values[z])
+    return [{'label': i, 'value': i} for i in articles]
 '''
 
-'''
 @app.callback(
-    Output('articles', 'children'),
-    Input('app', 'value'))
-def set_display_articles(all_articles):
-    return all_articles[0]['value']
+    Output('graph validation', 'figure'),
+    Input('app','value'))
+def interactive(sel_app):
+    dff = df_ARTICOLI[df_ARTICOLI['title app'] == sel_app]
+    fig_val = px.pie(dff, names='validation')
+    return fig_val
+
+    #dff = df_DB[df_DB['title'] == sel_app]
+    #fig_val = px.pie(dff, labels=["#meta", "#sys", "#rct", "#obs"], textinfo='label+percent')
+    #return fig_val
+
+
 
 @app.callback(
-    Output('display-selected-values', 'children'),
-    Input('categories', 'value'),
-    Input('app', 'value'))
-def set_display_children(selected_category, selected_app):
-    return u'{} is an app in {}'.format(
-        selected_app, selected_category,
+    Output('display information article', 'children'),
+    Input('articles', 'value'))
+def display_validation(selected_article):
+    dff = df_ARTICOLI[df_ARTICOLI['title'] == selected_article]
+    return u'TITLE: {}\r\n' \
+           u'ID: {}\r\n' \
+           u'JOURNAL: {}\r\n' \
+           u'PUBLICATION DATE: {}\r\n' \
+           u'VALIDATION: {}\r\n'.format(
+        dff['title'].unique(),
+        dff['id'].unique(),
+        dff['journal'].unique(),
+        dff['publication date'].unique(),
+        dff['validation'].unique()
+    )
+
+    '''
+    for j in range(len(df_ARTICOLI)):
+        if df_ARTICOLI['title'].values[j] == selected_article:
+            pos = j
+    return u'TITLE: {}\r\n' \
+           u'ID: {}\r\n' \
+           u'JOURNAL: {}\r\n' \
+           u'PUBLICATION DATE: {}\r\n' \
+           u'VALIDATION: {}\r\n'.format(
+        df_ARTICOLI['title'].values[pos],
+        df_ARTICOLI['id'].values[pos],
+        df_ARTICOLI['publication date'].values[pos],
+        df_ARTICOLI['journal'].values[pos],
+        df_ARTICOLI['validation'].values[pos]
     )
 '''
-
 if __name__ == '__main__':
     app.run_server()
