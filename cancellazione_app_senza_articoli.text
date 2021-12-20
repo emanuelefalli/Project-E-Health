@@ -1,0 +1,22 @@
+import pandas as pd
+
+ARTICOLI = pd.read_excel('prova_articles_ids.xlsx')
+df_ARTICOLI = pd.DataFrame(ARTICOLI)
+
+DB_app= pd.read_excel('prova.xlsx')
+df_DB_app = pd.DataFrame(DB_app)
+
+for i in range(len(df_ARTICOLI.columns)):
+    titolo_app = df_ARTICOLI.columns[i]
+    print(titolo_app)
+    print(df_ARTICOLI[titolo_app].values[0])
+    if str(df_ARTICOLI[titolo_app].values[0]) == 'nan':
+        df_ARTICOLI.drop(columns=titolo_app)
+        print('drop')
+        j = 0
+        while df_DB_app['title'].values[j] != titolo_app:
+            j = j+1
+        df_DB_app.drop(j)
+        print('drop')
+    df_DB_app.to_excel('prova.xlsx', index=False)
+    df_ARTICOLI.to_excel('prova_articles_ids.xlsx', index=False)

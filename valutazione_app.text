@@ -1,0 +1,75 @@
+#con questo codice abbiamo dato a ogni applicazione una valutazione sulla base del numero di articoli e delle tipologie di studio di ogni articolo, il tutto normalizzato sul numero di
+# articoli totatli riferiti alla i-esima applicazione. per differenziare il peso dei diversi studi abbiamo dato valori iniziali differenti: meta analisi 10 punti, systematic reviuew 5 punti,
+#rct 1 punto e observational study 0.1 punti.
+#il passaggio successivo è stato quello di normalizzare i voti da 0 a 5 per poter sfruttare l'informazione per applicare uno score basato sulle stelline sulla dashbopard
+
+import pandas as pd
+
+DB = pd.read_excel('prova.xlsx')
+ARTICOLI = pd.read_excel('prova_DB_ARTICOLI.xlsx')
+
+df_DB = pd.DataFrame(DB)
+df_ARTICOLI= pd.DataFrame(ARTICOLI)
+
+meta = 10
+sys = 5
+rct = 1
+obs = 0.1
+
+count_meta = 0
+count_sys = 0
+count_rct = 0
+count_obs = 0
+
+punteggio = 0
+
+for i in range(len(df_DB)):
+    titolo_app = df_DB['title'].values[i]
+    n_art = int(df_DB['#art'].values[i])
+    df1 = df_ARTICOLI[df_ARTICOLI['title app'] == titolo_app]
+    for z in range(len(df1)):
+        validazione = df1['validation'].values[z]
+        if validazione == "Meta-Analysis":
+            count_meta = count_meta +1
+        if validazione == "Systematic Review":
+            count_sys = count_sys +1
+        if validazione == "RCT":
+            count_rct = count_rct +1
+        if validazione == "Observational Study":
+            count_obs = count_obs +1
+    punteggio = (count_meta*meta + count_sys*sys + count_rct*rct + count_obs*obs)/n_art
+    df_DB['evaluation'].values[i] = punteggio
+    punteggio = 0
+    count_meta = 0
+    count_sys = 0
+    count_rct = 0
+    count_obs = 0
+df_DB.to_excel('prova.xlsx', index=False)
+
+
+for i in range(len(df_DB)):
+    valutazione = df_DB['evaluation'].values[i]
+    if valutazione >= 0 and valutazione < 0.5:
+        df_DB['evaluation'].values[i] = str('0')
+    elif valutazione >= 0.5 and valutazione <= 1:
+        df_DB['evaluation'].values[i] = str('0.5')
+    elif valutazione > 1 and valutazione <= 2:
+        df_DB['evaluation'].values[i] = str('1')
+    elif valutazione > 2 and valutazione <= 3:
+        df_DB['evaluation'].values[i] = str('1.5')
+    elif valutazione > 3 and valutazione <= 4:
+        df_DB['evaluation'].values[i] = str('2')
+    elif valutazione > 4 and valutazione <= 5:
+        df_DB['evaluation'].values[i] = str('2.5')
+    elif valutazione > 5 and valutazione <= 6:
+        df_DB['evaluation'].values[i] = str('3')
+    elif valutazione > 6 and valutazione <= 7:
+        df_DB['evaluation'].values[i] = str('3.5')
+    elif valutazione > 7 and valutazione <= 8:
+        df_DB['evaluation'].values[i] = str('4')
+    elif valutazione > 8 and valutazione <= 9:
+        df_DB['evaluation'].values[i] = str('4.5')
+    elif valutazione > 9 and valutazione <= 10:
+        df_DB['evaluation'].values[i] = str('5')
+    df_DB.to_excel('prova.xlsx', index=False)
+

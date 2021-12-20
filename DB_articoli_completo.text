@@ -1,0 +1,52 @@
+#in questa sezione abbiamo creato il database degli articoli raccolti. quindi per ogni articolo del file prova_articles_ids.xlsx abbiamo cercato su pymed le informazioni e le abbiamo
+#inserite in questo nuovo database.
+#in questo modo alla fine otterremo un database per le applicazioni e un database per gli articoli. questo appena creato sarà il database utilizzato per mostrare a video le informazioni
+#degli articoli selezionati nella dashboard finale
+
+import pandas as pd
+from pymed import PubMed
+
+pubmed = PubMed(tool='ehealth_group01', email='davide.fiorani@mail.polimi.it')
+
+papers = []
+column = ['title', 'id', 'publication date', 'journal', 'title app']
+
+
+ARTICOLI = pd.read_excel('prova_articles_ids.xlsx')
+df_ARTICOLI = pd.DataFrame(ARTICOLI)
+
+DB_articoli = open('prova_DB_ARTICOLI.xlsx','w')
+df_DB_ARTICOLI = pd.DataFrame(columns=column)
+
+z = 1
+
+for i in range(len(df_ARTICOLI.columns)):
+    titolo_app = df_ARTICOLI.columns[i]
+    print(titolo_app)
+    for j in range(len(df_ARTICOLI)):
+        if str(df_ARTICOLI[titolo_app].values[j]) != 'nan':
+            id = int(df_ARTICOLI[titolo_app].values[j])
+            print(id)
+            results = pubmed.query(id, max_results=1)
+            for res in results:
+                papers.append(res.toDict())
+            print(papers)
+            if str(papers[0]['pubmed_id'].split('\n')[0]) == str(id):
+                df_DB_ARTICOLI.loc[z, df_DB_ARTICOLI.columns.get_loc('title')] = str(papers[0]['title'])
+                df_DB_ARTICOLI.loc[z, df_DB_ARTICOLI.columns.get_loc('id')] = str(papers[0]['pubmed_id'].split('\n')[0])
+                df_DB_ARTICOLI.loc[z, df_DB_ARTICOLI.columns.get_loc('publication date')] = str(papers[0]['publication_date'])
+                if str(papers[0]['title']) != 'Tuberculosis Stigma and Racism, Colonialism, and Migration: A Rapid Qualitative Review':
+                    df_DB_ARTICOLI.loc[z, df_DB_ARTICOLI.columns.get_loc('journal')] = str(papers[0]['journal'])
+                else:
+                    df_DB_ARTICOLI.loc[z, df_DB_ARTICOLI.columns.get_loc('journal')] = str(papers[0]['publisher'])
+                df_DB_ARTICOLI.loc[z, df_DB_ARTICOLI.columns.get_loc('title app')] = titolo_app
+                papers = []
+                z = z+1
+                df_DB_ARTICOLI.to_excel('prova_DB_ARTICOLI.xlsx', index=False)
+
+
+
+
+
+
+

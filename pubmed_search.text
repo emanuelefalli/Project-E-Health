@@ -1,0 +1,40 @@
+#in questo file partiamo dal database costruito durante le prime settimane di lavoro nel quale erano presenti 246 applicazioni selezionate da noi secondo determinati principi.
+#in questa sezione effettuiamo la ricerca di articoli relativi alle applicazioni selezionate amdando a cercare in PubMed attraverso la libreria pymed il titolo della applicazione segioto da una serie
+#di parole che ristringono il campo a giochi per bambini.
+#l'output ottenuto è un database contenente gli id degli articoli trovati per le varie applicazioni
+
+from pprint import pprint
+import pip
+from pandas.io.excel._xlsxwriter import XlsxWriter
+from pymed import PubMed
+import pandas as pd
+
+pubmed = PubMed(tool='ehealth_group01',email='davide.fiorani@mail.polimi.it')
+papers = []
+column = list()
+ids = list()
+max_app = 300
+
+data = pd.read_excel('prova.xlsx')
+articles = open("prova_articles_ids.xlsx", 'w')
+
+for i in range(len(data)):
+    column.append(data.iloc[i]['title'])
+
+df = pd.DataFrame(columns=column)
+df.to_excel('prova_articles_ids.xlsx')
+
+for i in range(len(data)):
+    results = pubmed.query('"' + data.iloc[i]['title'] + '"' + 'AND ((app OR apps OR virtual tool*) NOT (amyloid)) AND (kid OR kids OR child* OR baby OR babies OR juvenile)', max_results=max_app)
+    for res in results:
+        papers.append(res.toDict())
+    for paper in range(len(papers)):
+        if str(papers[paper]['publication_date']) > str(2010):
+            ids.append(papers[paper]['pubmed_id'].split('\n')[0])
+    if len(ids) < max_app:
+        while len(ids) != max_app:
+            ids.append('NaN')
+    df[data.iloc[i]['title']] = ids
+    df.to_excel('prova_articles_ids.xlsx')
+    ids = []
+    papers = []

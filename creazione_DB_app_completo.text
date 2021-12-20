@@ -1,0 +1,45 @@
+#in questa sezione andiamo ad aggiungere gli id degli articoli relativi alle varie applicazioni nel database delle applicazioni, in modo tale da avere sulla riga della i-esima app
+#la serie di articoli ad essa correlati. allo stesso tempo aggiungiamo il riferimento dell'app anche sul database degli articoli, in modo tale da avere per ogni articolo l'app a cui è riferito
+
+import pandas as pd
+
+DB = pd.read_excel('prova.xlsx')
+df_DB = pd.DataFrame(DB)
+
+ARTICOLI = pd.read_excel('prova_articles_ids.xlsx')
+df_ARTICOLI_1 = pd.DataFrame(ARTICOLI)
+
+DB_ARTICOLI = pd.read_excel('prova_DB_ARTICOLI.xlsx')
+df_DB_ARTICOLI = pd.DataFrame(DB_ARTICOLI)
+
+df_DB['#art'] = ''
+df_DB.to_excel('prova.xlsx',index=False)
+
+n_art = 0
+len_art = list()
+
+for i in range(len(df_DB)):
+    titolo = str(df_DB['title'].values[i])
+    for j in range(len(df_ARTICOLI_1)):
+        if str(df_ARTICOLI_1[titolo].values[j]) != 'nan':
+            n_art = n_art + 1
+    len_art.append(n_art)
+    df_DB['#art'].values[i] = n_art
+    df_DB.to_excel('prova.xlsx', index=False)
+    n_art = 0
+
+
+for j in range(len(df_ARTICOLI_1)):
+    df_DB['articolo' + str(j + 1)] = str('')
+df_DB.to_excel('prova.xlsx', index=False)
+
+
+for i in range(len(df_DB)):
+    titolo = df_DB['title'].values[i]
+    art = len_art[i]
+    for j in range(art):
+        id_articolo = df_ARTICOLI_1[titolo].values[j]
+        df_DB['articolo' + str(j+1)].values[i] = id_articolo
+df_DB.to_excel('prova.xlsx', index=False)
+
+

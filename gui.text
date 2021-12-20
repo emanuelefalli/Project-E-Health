@@ -1,0 +1,301 @@
+import base64
+import json
+from pprint import pprint
+from PIL import Image
+import numpy as np
+
+import dash
+import pandas as pd
+from dash import dcc
+from dash import html
+from dash.dependencies import Input, Output
+import dash_bootstrap_components as dbc
+import plotly.express as px
+import plotly.graph_objects as go
+
+#external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.MINTY])
+
+DB = pd.read_excel('prova.xlsx')
+ARTICOLI = pd.read_excel('prova_DB_ARTICOLI.xlsx')
+
+df_DB = pd.DataFrame(DB)
+df_ARTICOLI= pd.DataFrame(ARTICOLI)
+
+
+app.layout = html.Div([
+    dbc.Row(dbc.Col(html.H1("DASHBOARD", style={'text-align': 'center'}))),
+    dbc.Row([
+        dbc.Col(dcc.Dropdown(
+        id='categories',
+        options=[{'label': k, 'value': k} for k in sorted(df_DB['category'].unique())],
+        placeholder="Select a category",)),
+    ]),
+    dbc.Row([
+        dcc.Graph(
+            id='graph app-article',
+            figure={}),
+    ]),
+    dbc.Row([
+        dbc.Col(dcc.Dropdown(
+        id='app',
+        options=[{'label': k, 'value': k} for k in sorted(df_DB['category'].unique())],
+        placeholder="Select an app",),
+        width={'size':8, "offset":0, 'order':1}),
+        dbc.Col(dcc.Dropdown(
+            id='app filter',
+            options=[
+                {'label': 'Dalla A alla Z', 'value': 'Dalla A alla Z'},
+                {'label': 'Dalla Z alla A', 'value': 'Dalla Z alla A'},
+                {'label': 'Valutazione crescente', 'value': 'Valutazione crescente'},
+                {'label': 'Valutazione decrescente', 'value': 'Valutazione decrescente'}],
+            value='Dalla A alla Z'
+        ),
+        width={'size':3, "offset":0, 'order':2})
+    ]),
+    dbc.Row([
+        dbc.Col([
+            dbc.Row([
+            dbc.Row(html.Div(
+                id='display title',
+        )),
+            dbc.Row(html.Div(
+                id='display category',
+        )),
+            dbc.Row(html.Div(
+                id='display score',
+        )),
+            dbc.Row(html.Div(
+                id='display reviews',
+        )),
+            dbc.Row(html.Div(
+                id='display installs',
+        )),
+            dbc.Row(html.Div(
+                id='display url',
+        )),
+            ]),
+            dbc.Row([
+                html.Img(
+                    id='score star',
+                    src=''
+                )
+            ]),
+        ],
+        width={'size':7}),
+        dbc.Col(dcc.Graph(
+        id='graph validation',
+        figure=[]
+        ),
+        width={'size':5})
+    ]),
+    dbc.Row([
+        dbc.Col(dcc.Dropdown(
+        id='articles',
+        options=[],
+        placeholder="Select an article",
+        )),
+    ]),
+    dbc.Row([
+            dbc.Row(html.Div(
+                id='display title article',
+        )),
+            dbc.Row(html.Div(
+                id='display id',
+        )),
+            dbc.Row(html.Div(
+                id='display journal',
+        )),
+            dbc.Row(html.Div(
+                id='display publication date',
+        )),
+            dbc.Row(html.Div(
+                id='display validation',
+        )),
+    ]),
+])
+
+
+@app.callback(
+    Output('graph app-article', 'figure'),
+    Input('categories','value'))
+def interactive(sel_cat):
+    dff = df_DB[df_DB['category'] == sel_cat]
+    fig = px.bar(dff, x='title', y=["Observational Study", "RCT", "Systematic Review", "Meta Analysis"])
+    return fig
+
+@app.callback(
+    Output('app', 'options'),
+    Input('categories', 'value'),
+    Input('app filter','value'))
+def filter(sel_category, sel_filter):
+    dff = df_DB[df_DB['category'] == sel_category]
+    if sel_filter == 'Dalla A alla Z':
+        df1 = dff.sort_values(by='title', ascending=True)
+    elif sel_filter == 'Dalla Z alla A':
+        df1 = dff.sort_values(by='title', ascending=False)
+    elif sel_filter == 'Valutazione crescente':
+        df1 = dff.sort_values(by='evaluation', ascending=True)
+    elif sel_filter == 'Valutazione decrescente':
+        df1 = dff.sort_values(by='evaluation', ascending=False)
+    return [{'label': i, 'value': i} for i in df1['title']]
+
+@app.callback(
+    Output('display title', 'children'),
+    Input('app','value'))
+def info_app(selected_app):
+    dff = df_DB[df_DB['title'] == selected_app]
+    return u'TITLE: {}'.format(
+        dff['title'].values[0]
+    )
+
+@app.callback(
+    Output('display category', 'children'),
+    Input('app','value'))
+def info_app(selected_app):
+    dff = df_DB[df_DB['title'] == selected_app]
+    return u'CATEGORY: {}'.format(
+        dff['category'].values[0]
+    )
+
+@app.callback(
+    Output('display score', 'children'),
+    Input('app','value'))
+def info_app(selected_app):
+    dff = df_DB[df_DB['title'] == selected_app]
+    return u'SCORE: {}'.format(
+        dff['score'].values[0]
+    )
+
+@app.callback(
+    Output('display reviews', 'children'),
+    Input('app','value'))
+def info_app(selected_app):
+    dff = df_DB[df_DB['title'] == selected_app]
+    return u'REVIEWS: {}'.format(
+        dff['reviews'].values[0]
+    )
+
+@app.callback(
+    Output('display installs', 'children'),
+    Input('app','value'))
+def info_app(selected_app):
+    dff = df_DB[df_DB['title'] == selected_app]
+    return u'INSTALLS: {}'.format(
+        dff['installs'].values[0]
+    )
+
+@app.callback(
+    Output('display url', 'children'),
+    Input('app','value'))
+def info_app(selected_app):
+    dff = df_DB[df_DB['title'] == selected_app]
+    return u'URL: {}'.format(
+        dff['url'].values[0]
+    )
+
+@app.callback(
+    Output('score star', 'src'),
+    Input('app','value'))
+def score(selected_app):
+    dff = df_DB[df_DB['title'] == selected_app]
+    if float((dff['evaluation'].values)) == 0.0:
+        img_file = 'score 0.jpg'
+        encoded_image = base64.b64encode(open(img_file, 'rb').read())
+    if float(dff['evaluation'].values) == 0.5:
+        img_file = 'score 05.jpg'
+        encoded_image = base64.b64encode(open(img_file, 'rb').read())
+    elif float(dff['evaluation'].values) == 1.0:
+        img_file = 'score 1.jpg'
+        encoded_image = base64.b64encode(open(img_file, 'rb').read())
+    elif float(dff['evaluation'].values) == 1.5:
+        img_file = 'score 15.jpg'
+        encoded_image = base64.b64encode(open(img_file, 'rb').read())
+    elif float(dff['evaluation'].values) == 2.0:
+        img_file = 'score 2.jpg'
+        encoded_image = base64.b64encode(open(img_file, 'rb').read())
+    elif float(dff['evaluation'].values) == 2.5:
+        img_file = 'score 25.jpg'
+        encoded_image = base64.b64encode(open(img_file, 'rb').read())
+    elif float(dff['evaluation'].values) == 3.0:
+        img_file = 'score 3.jpg'
+        encoded_image = base64.b64encode(open(img_file, 'rb').read())
+    elif float(dff['evaluation'].values) == 3.5:
+        img_file = 'score 35.jpg'
+        encoded_image = base64.b64encode(open(img_file, 'rb').read())
+    elif float(dff['evaluation'].values) == 4.0:
+        img_file = 'score 4.jpg'
+        encoded_image = base64.b64encode(open(img_file, 'rb').read())
+    elif float(dff['evaluation'].values) == 4.5:
+        img_file = 'score 45.jpg'
+        encoded_image = base64.b64encode(open(img_file, 'rb').read())
+    elif float(dff['evaluation'].values) == 5.0:
+        img_file = 'score 5.jpg'
+        encoded_image = base64.b64encode(open(img_file, 'rb').read())
+    return 'data:image/png;base64,{}'.format(encoded_image.decode())
+
+@app.callback(
+    Output('graph validation', 'figure'),
+    Input('app','value'))
+def interactive(sel_app):
+    dff = df_ARTICOLI[df_ARTICOLI['title app'] == sel_app]
+    labels = ['Observational Study', 'RCT', 'Systematic Review', 'Meta-Analysis']
+    values = [len(dff[dff['validation'] == 'Observational Study']), len(dff[dff['validation'] == 'RCT']), len(dff[dff['validation'] == 'Systematic Review']), len(dff[dff['validation'] == 'Meta-Analysis'])]
+    fig_val = go.Figure(data=[go.Pie(labels=labels, values=values)])
+    return fig_val
+
+@app.callback(
+    Output('articles', 'options'),
+    Input('app', 'value'))
+def set_app(selected_app):
+    dff = df_ARTICOLI[df_ARTICOLI['title app'] == selected_app]
+    return [{'label': i, 'value': i} for i in dff['title'].unique()]
+
+@app.callback(
+    Output('display title article', 'children'),
+    Input('articles', 'value'))
+def display_validation(selected_article):
+    dff = df_ARTICOLI[df_ARTICOLI['title'] == selected_article]
+    return u'TITLE: {}'.format(
+        dff['title'].values[0]
+    )
+
+@app.callback(
+    Output('display id', 'children'),
+    Input('articles', 'value'))
+def display_validation(selected_article):
+    dff = df_ARTICOLI[df_ARTICOLI['title'] == selected_article]
+    return u'ID: {}'.format(
+        dff['id'].values[0]
+    )
+
+@app.callback(
+    Output('display journal', 'children'),
+    Input('articles', 'value'))
+def display_validation(selected_article):
+    dff = df_ARTICOLI[df_ARTICOLI['title'] == selected_article]
+    return u'JOURNAL: {}'.format(
+        dff['journal'].values[0]
+    )
+
+@app.callback(
+    Output('display publication date', 'children'),
+    Input('articles', 'value'))
+def display_validation(selected_article):
+    dff = df_ARTICOLI[df_ARTICOLI['title'] == selected_article]
+    return u'PUBLICATION DATE: {}'.format(
+        dff['publication date'].values[0]
+    )
+
+@app.callback(
+    Output('display validation', 'children'),
+    Input('articles', 'value'))
+def display_validation(selected_article):
+    dff = df_ARTICOLI[df_ARTICOLI['title'] == selected_article]
+    return u'VALIDATION: {}'.format(
+        dff['validation'].values[0]
+    )
+
+if __name__ == '__main__':
+    app.run_server()

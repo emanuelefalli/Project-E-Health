@@ -1,0 +1,40 @@
+#in questa sezione abbiamo voluto aggiungere al database delle applicazione i conteggi delle tipologie dei vari studi riferiti alle applicazioni.
+#in questo modo ogni applicazione ha le seguenti informazioni: numero di articoli totali, numero articoli di meta analisi, di systematic review, di rct e di observational study
+
+import pandas as pd
+import openpyxl
+from openpyxl import Workbook
+
+DB = pd.read_excel('prova.xlsx')
+ARTICOLI = pd.read_excel('prova_DB_ARTICOLI.xlsx')
+
+df_DB = pd.DataFrame(DB)
+df_ARTICOLI= pd.DataFrame(ARTICOLI)
+
+count_meta = 0
+count_sys = 0
+count_rct = 0
+count_obs = 0
+
+for i in range(len(df_DB)):
+    titolo_app = df_DB['title'].values[i]
+    dff = df_ARTICOLI[df_ARTICOLI['title app'] == titolo_app]
+    for j in range(len(dff)):
+        validazione = dff['validation'].values[j]
+        if validazione == 'Meta-Analysis':
+            count_meta = count_meta + 1
+        elif validazione == 'Systematic Review':
+            count_sys = count_sys + 1
+        elif validazione == 'RCT':
+            count_rct = count_rct + 1
+        elif validazione == 'Observational Study':
+            count_obs = count_obs + 1
+    df_DB['Meta Analysis'].values[i] = count_meta
+    df_DB['Systematic Review'].values[i] = count_sys
+    df_DB['RCT'].values[i] = count_rct
+    df_DB['Observational Study'].values[i] = count_obs
+    df_DB.to_excel('prova.xlsx', index=False)
+    count_meta = 0
+    count_sys = 0
+    count_rct = 0
+    count_obs = 0

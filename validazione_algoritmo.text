@@ -1,0 +1,68 @@
+#in questa sezione effettuiamo la validazione dell'algoritmo usato per l'assegnazione delle diverse tipologie di studio agli articoli del nostro database
+
+import re
+import openpyxl
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup as bs
+
+articles = pd.read_excel('articoli_da_validare.xlsx')
+df_articles = pd.DataFrame(articles)
+
+MetaAnalysis = open('META_ANALYSIS.txt','r')
+MetaAnalysis_words = MetaAnalysis.readlines()
+
+Rct = open('RCT.txt','r')
+Rct_words = Rct.readlines()
+
+ObservationalStudy = open('OBSERVATIONAL_STUDY.txt','r')
+ObservationalStudy_words = ObservationalStudy.readlines()
+
+SystematicReview = open('SYSTEMATIC_REVIEW.txt','r')
+SystematicReview_words = SystematicReview.readlines()
+
+Abstract = "Abstract"
+Meta = "Meta-Analysis"
+rct = "RCT"
+obs = "Observational Study"
+sys = "Systematic Review"
+
+sum_meta = 0
+sum_sys = 0
+sum_rct = 0
+sum_obs = 0
+
+for i in range(len(df_articles)):
+    id_articolo = df_articles['id'].values[i]
+    url = requests.get('https://pubmed.ncbi.nlm.nih.gov/' + str(id_articolo) + '/')
+    URL = bs(url.text, 'html5lib')
+    abstract_presence = URL.find("h2", {"class": "title"})
+    if (abstract_presence.text.strip()) == Abstract:
+        contenuto = URL.find("div", {"class": "abstract-content selected", "id": "enc-abstract"})
+        abstract = contenuto.text
+        for k in range(len(MetaAnalysis_words)):
+            conteggio = re.findall(MetaAnalysis_words[k].split('\n')[0], abstract, flags=re.IGNORECASE)
+            sum_meta = sum_meta + len(conteggio)
+        for k in range(len(Rct_words)):
+            conteggio = re.findall(Rct_words[k].split('\n')[0], abstract, flags=re.IGNORECASE)
+            sum_rct = sum_rct + len(conteggio)
+        for k in range(len(SystematicReview_words)):
+            conteggio = re.findall(SystematicReview_words[k].split('\n')[0], abstract, flags=re.IGNORECASE)
+            sum_sys = sum_sys + len(conteggio)
+        for k in range(len(ObservationalStudy_words)):
+            conteggio = re.findall(ObservationalStudy_words[k].split('\n')[0], abstract, flags=re.IGNORECASE)
+            sum_obs = sum_obs + len(conteggio)
+        if sum_meta > 0:
+            df_articles.iloc[i, df_articles.columns.get_loc('result')] = Meta
+        elif sum_sys > 0:
+            df_articles.iloc[i, df_articles.columns.get_loc('result')] = sys
+        elif sum_rct > 0:
+            df_articles.iloc[i, df_articles.columns.get_loc('result')] = rct
+        elif sum_obs > 0:
+            df_articles.iloc[i, df_articles.columns.get_loc('result')] = obs
+        sum_meta = 0
+        sum_sys = 0
+        sum_rct = 0
+        sum_obs = 0
+
+df_articles.to_excel('articoli_da_validare.xlsx', index=False)
